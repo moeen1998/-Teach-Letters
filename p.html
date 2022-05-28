@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Project #1</title>
+        <link rel="stylesheet" href="style.css"/>
+    </head>
+    <body id="b">
+        
+        <i><h1><center>WELCOME</center></h1></i>
+        <i>How Many Character That You Want To Learn :</i> <input id="inp" type="number"  max="26" min="0"> 
+        <button class="color" id="btn">generate</button>
+        <button id="gotop" class="color">your data</button>
+        <div id="div"></div>
+        <img src="" style="display: none;">
+        
+    </body>
+    <script src="jquery-3.2.1.min.js"></script>
+    <script>
+        var values = [];
+        var bbb=document.getElementById("b");
+        var n = document.getElementById('inp');
+        var but = document.getElementById('btn');
+        var div = document.getElementById("div");
+        var today=new Date();
+        var newnumber;
+        
+        /*علشان اجيب رقم عشوائي*/
+        function getRandom()
+        {
+            return (Math.floor(Math.random()*26));
+        }
+        
+        /*علشان اعرف انا دوست الحرف دا كام مره */
+        var numberofclick=Array(0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0);
+        
+        /*الحروف */
+        var chararr = Array("A" , "B" , "C" , "D" , "E" , "F" , "G" , "H" , "I" , "J" , "K" , "L" , "M" , "N" , "O" , "P" , "Q" , "R" , "S" , "T" , "U" , "V" , "W" , "X" , "Y" , "Z");
+        
+        but.onclick = function(e){
+            var arr = [];/*علشان لما اعمل ريلود الداتا اللي فيها تتمسح بدل م اللاب يهنج*/
+            div.textContent = "";
+            if(n.value <= 26){
+                for(var i = 0;i < n.value;i++){
+                    newnumber = getRandom();
+                    /* علشان اتاكد ان الارقام مش متكرره علشان الحروف متتكررش*/
+                    while(arr.indexOf(newnumber)!=-1)
+                        {
+                            newnumber=getRandom();
+                        }
+                    arr[i]=newnumber;
+                }
+                /* create the buttons*/
+                for(var i = 0;i < n.value;i++){   
+                    var node = document.createElement("button");
+                    var text = document.createTextNode(chararr[arr[i]]+(chararr[arr[i]]).toLowerCase());
+                    node.appendChild(text);
+                    div.appendChild(node);
+                    /*علشان احط style للعناصر الجديده*/
+                    node.style="width: 110px; height: 33px; color: #257425; font-style: italic;background-color:rgb(245, 237, 31);font-weight:600;font-size:20px; border: 2px solid #ccc; margin: 0 5px 5px 5px; cursor: pointer;";
+                    localStorage[chararr[arr[i]]+" created"]=(today.getMonth()+1) + "-" + today.getDate() + ":" + today.getHours()+":" + today.getMinutes();
+                }    
+            }
+            /*علشان اخفي الصوره القديمه لو موجوده*/
+            var im=document.getElementsByTagName("img")[0];
+            if(im.src){
+                im.setAttribute("style","display:none");
+            }
+            
+            localStorage[e.target.textContent]=(today.getMonth()+1) + "-" + today.getDate() + ":" + today.getHours()+":" + today.getMinutes();
+            
+        };
+        /*التخزين ف اللوكال و عرض الصور*/
+        div.addEventListener("click",function(e){
+            
+            /*e.target.textContent[0]   علشان اجيب اول حرف و اقدر اجيب مكانه علشان */
+            var index=chararr.indexOf(e.target.textContent[0]);
+            numberofclick[index]+=1;
+            var im=document.getElementsByTagName("img")[0];
+            im.src=e.target.textContent+".PNG";
+            im.setAttribute("style","display:block");  
+            
+//            localStorage[e.target.textContent[0]+" "+e.type]= "You prised this cahar for " +numberofclick[index]+" times and the last click on "+ new Date();
+            
+            if(localStorage[e.target.textContent[0] + " " + e.type] == undefined){
+                localStorage[e.target.textContent[0] + " " + e.type] ="you presed "+ e.target.textContent +" on " +(today.getMonth()+1) + "-" + today.getDate() + ":" + today.getHours()+":" + today.getMinutes() ;
+            }
+            else
+            {
+                localStorage[e.target.textContent[0]+" "+e.type] +=" and " +(today.getMonth()+1) + "-" + today.getDate() + ":" + today.getHours()+":" + today.getMinutes() ;
+            }
+                
+        });
+        window.addEventListener("load",function(){
+
+            
+            if(localStorage["load"] == undefined){
+                localStorage["load"] ="on "+(today.getMonth()+1) + "-" + today.getDate() + ":" + today.getHours()+":" + today.getMinutes() ;
+            }
+            else
+            {
+                localStorage["load"] += " and "+today.getDate() + ":" + today.getHours()+":" + today.getMinutes() ;
+            }
+            
+            
+            
+            
+//            localStorage["load"]+=(today.getMonth()+1) + "-" + today.getDate() + ":" + today.getHours()+":" + today.getMinutes();
+        });
+
+
+        window.addEventListener("unload",function(){
+
+            if(localStorage["unload"] == undefined){
+                localStorage["unload"] ="on "+(today.getMonth()+1) + "-" + today.getDate() + ":" + today.getHours()+":" + today.getMinutes() ;
+            }
+            else
+            {
+                localStorage["unload"] += " and "+today.getDate() + ":" + today.getHours()+":" + today.getMinutes() ;
+            }
+        });
+        
+        var interval=setInterval(function(){
+            values=[];
+            allStorage();
+            
+            $.ajax({
+                    type:"POST",
+					url:"q.php",
+                    data:{"val":JSON.stringify(values)},
+					success:function(response){
+						console.log("post method excuted");
+                        <!-- console.log("send successfully!"); -->
+                        console.log(response);
+                        localStorage.clear();
+					}
+					
+				});     
+			},5000);
+        
+        
+        function getboject(key,val)
+        {
+            k=key;
+            v=val;
+            var zxc={};
+            zxc[k]=v;
+            return zxc
+        };
+        
+        function allStorage() {
+                   keys = Object.keys(localStorage),
+                   i = keys.length;
+                    while ( i-- ) {
+                        values.push(getboject(keys[i],localStorage.getItem(keys[i])));
+                    }
+ 
+               }
+        
+        
+        
+        
+        $("#gotop").on("click",function(){
+            
+            $.ajax({
+                type:"GET",
+                url:"q.php",
+                data:{"val": "asd"},
+                success:function(response){
+                    <!-- console.log("send successfully!"); -->
+					console.log("get method");
+                    console.log(response);
+                }
+					
+            });
+            
+            
+        })
+         
+        
+        
+    </script>
+</html>
